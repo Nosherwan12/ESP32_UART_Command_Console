@@ -2,10 +2,13 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stddef.h>
+#include <string.h>
 #include "esp_err.h"
 
 #include "uart_console.h"
 #include "command_parser.h"
+#include "command_dispatcher.h"
+#include "led.h"
 
 #define COMMAND_BUFFER_SIZE 256
 
@@ -13,6 +16,8 @@ void app_main(void)
 {
     // Initialize UART console
     ESP_ERROR_CHECK(uart_console_init());
+
+    ESP_ERROR_CHECK(led_init());
 
     // Command storage
     char command_buffer[COMMAND_BUFFER_SIZE];
@@ -56,13 +61,12 @@ void app_main(void)
                 );
 
                 if (err == ESP_OK) {
-                    // Print parsed arguments
-                    printf("Parsed %d arguments:\r\n", argc);
-                    for (int i = 0; i < argc; i++) {
-                        printf("  argv[%d] = %s\r\n", i, argv[i]);
-                    }
+                    // Dispatch and execute the command
+                    esp_err_t exec_err = command_dispatcher_execute(argc, argv);
                     
-                    // TODO: Add command handling here
+                    if (exec_err == ESP_ERR_NOT_FOUND) {
+                        // Error message already printed by dispatcher
+                    } 
                 } else {
                     printf("Error: Too many arguments!\r\n");
                 }

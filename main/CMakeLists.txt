@@ -3,6 +3,9 @@ idf_component_register(
         "main.c"
         "uart_console.c"
         "command_parser.c"
+        "command_dispatcher.c"
+        "command_handlers.c"
+        "led.c"
     INCLUDE_DIRS 
         "."
 )
