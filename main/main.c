@@ -1,8 +1,6 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <ctype.h>
 #include <stddef.h>
-#include <string.h>
 #include "esp_err.h"
 
 #include "uart_console.h"
@@ -30,6 +28,7 @@ void app_main(void)
 
     // Track previous character for CR/LF handling
     bool previous_was_terminator = false;
+    bool command_overflow = false;
 
     while (1) {
         // Read one character from UART
@@ -46,6 +45,15 @@ void app_main(void)
                 continue;
             }
             previous_was_terminator = true;
+
+            // Check if overflow occurred
+            if (command_overflow) {
+                uart_console_printf("Error: Command too long\r\n");
+                // Reset for next command
+                cmd_index = 0;
+                command_overflow = false;
+                continue;
+            }
 
             // Null-terminate the command string
             command_buffer[cmd_index] = '\0';
@@ -68,7 +76,7 @@ void app_main(void)
                         // Error message already printed by dispatcher
                     } 
                 } else {
-                    printf("Error: Too many arguments!\r\n");
+                    uart_console_printf("Error: Too many arguments!\r\n");
                 }
             }
 
@@ -80,10 +88,19 @@ void app_main(void)
         else if (isprint((unsigned char)ch)) {
             previous_was_terminator = false;
 
+            // If overflow already occurred, discard characters
+            if (command_overflow) {
+                continue;
+            }
+
             // Store character if buffer has space
             if (cmd_index < COMMAND_BUFFER_SIZE - 1) {
                 command_buffer[cmd_index] = ch;
                 cmd_index++;
+            } else {
+                // Buffer is full - set overflow flag
+                command_overflow = true;
+                // Discard this character (don't store it)
             }
         }
     }

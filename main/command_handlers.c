@@ -11,6 +11,7 @@
 #include "command_handlers.h"
 #include "command_dispatcher.h"
 #include "led.h"
+#include "uart_console.h"
 
 
 esp_err_t help_handler(int argc, char *argv[])
@@ -22,7 +23,7 @@ esp_err_t help_handler(int argc, char *argv[])
 esp_err_t led_handler(int argc, char *argv[])
 {
     if (argc != 2) {
-        printf("Usage: led <on|off|status>\r\n");
+        uart_console_printf("Usage: led <on|off|status>\r\n");
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -32,7 +33,7 @@ esp_err_t led_handler(int argc, char *argv[])
         esp_err_t ret = led_on();
 
         if (ret == ESP_OK) {
-            printf("LED turned ON\r\n");
+            uart_console_printf("LED turned ON\r\n");
         }
 
         return ret;
@@ -42,19 +43,19 @@ esp_err_t led_handler(int argc, char *argv[])
         esp_err_t ret = led_off();
 
         if (ret == ESP_OK) {
-            printf("LED turned OFF\r\n");
+            uart_console_printf("LED turned OFF\r\n");
         }
 
         return ret;
     }
 
     else if (strcmp(action, "status") == 0) {
-        printf("LED is %s\r\n", led_get_state() ? "ON" : "OFF");
+        uart_console_printf("LED is %s\r\n", led_get_state() ? "ON" : "OFF");
         return ESP_OK;
     }
 
     else {
-        printf("Invalid action: %s (use on/off/status)\r\n", action);
+        uart_console_printf("Invalid action: %s (use on/off/status)\r\n", action);
         return ESP_ERR_INVALID_ARG;
     }
 }
@@ -63,11 +64,11 @@ esp_err_t led_handler(int argc, char *argv[])
 esp_err_t info_handler(int argc, char *argv[])
 {
     if (argc != 1) {
-        printf("Usage: info\r\n");
+        uart_console_printf("Usage: info\r\n");
         return ESP_ERR_INVALID_ARG;
     }
 
-    printf("\r\n=== System Info ===\r\n");
+    uart_console_printf("\r\n=== System Info ===\r\n");
 
     // Chip information
     esp_chip_info_t chip;
@@ -97,10 +98,10 @@ esp_err_t info_handler(int argc, char *argv[])
             break;
     }
 
-    printf("Chip:      %s (%d cores)\r\n", chip_name, chip.cores);
+    uart_console_printf("Chip:      %s (%d cores)\r\n", chip_name, chip.cores);
 
     // Memory information
-    printf("Free Heap: %lu KB\r\n",
+    uart_console_printf("Free Heap: %lu KB\r\n",
            (unsigned long)(esp_get_free_heap_size() / 1024));
 
     // Flash information
@@ -108,20 +109,20 @@ esp_err_t info_handler(int argc, char *argv[])
     esp_err_t ret = esp_flash_get_size(NULL, &flash_size);
 
     if (ret == ESP_OK) {
-        printf("Flash:     %lu MB\r\n",
+        uart_console_printf("Flash:     %lu MB\r\n",
                (unsigned long)(flash_size / (1024 * 1024)));
     } else {
-        printf("Flash:     unavailable (error: %s)\r\n",
+        uart_console_printf("Flash:     unavailable (error: %s)\r\n",
                esp_err_to_name(ret));
     }
 
     // ESP-IDF version
-    printf("IDF:       %s\r\n", esp_get_idf_version());
+    uart_console_printf("IDF:       %s\r\n", esp_get_idf_version());
 
     // Firmware build information
-    printf("Build:     %s %s\r\n", __DATE__, __TIME__);
+    uart_console_printf("Build:     %s %s\r\n", __DATE__, __TIME__);
 
-    printf("========================\r\n");
+    uart_console_printf("========================\r\n");
 
     return ESP_OK;
 }
@@ -130,15 +131,15 @@ esp_err_t reboot_handler(int argc, char *argv[])
 {
     // Validate: reboot command takes no arguments
     if (argc != 1) {
-        printf("Usage: reboot\r\n");
-        printf("This command takes no arguments\r\n");
+        uart_console_printf("Usage: reboot\r\n");
+        uart_console_printf("This command takes no arguments\r\n");
         return ESP_ERR_INVALID_ARG;
     }
     
     // Print restart message
-    printf("\r\n");
-    printf("        SYSTEM REBOOTING...              \r\n");
-    printf("\r\n");
+    uart_console_printf("\r\n");
+    uart_console_printf("        SYSTEM REBOOTING...              \r\n");
+    uart_console_printf("\r\n");
     
     // Small delay to allow UART to flush
     vTaskDelay(pdMS_TO_TICKS(100));

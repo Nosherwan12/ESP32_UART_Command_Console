@@ -13,6 +13,7 @@ extern "C" {
 esp_err_t uart_console_init(void);
 int uart_console_write(const char *data, size_t length);
 int uart_console_read(char *buffer, size_t length);
+int uart_console_printf(const char *format, ...);
 
 #ifdef __cplusplus
 }

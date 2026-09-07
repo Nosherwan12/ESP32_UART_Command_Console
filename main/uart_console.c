@@ -3,6 +3,8 @@
 #include "freertos/FreeRTOS.h"    
 #include "esp_log.h"           
 #include <stdbool.h>   
+#include <stdio.h>
+#include <stdarg.h>
 
 #define UART_CONSOLE_NUM        UART_NUM_1
 #define UART_CONSOLE_TX_GPIO    17
@@ -11,6 +13,7 @@
 
 #define UART_CONSOLE_RX_BUFFER_SIZE 1024
 #define UART_CONSOLE_TX_BUFFER_SIZE 1024
+#define UART_PRINTF_BUFFER_SIZE 256
 
 static const char *TAG = "UART_CONSOLE";
 
@@ -82,4 +85,36 @@ int uart_console_read(char *buffer, size_t length)
     );
 }
 
+int uart_console_printf(const char *format, ...)
+{
+    char buffer[UART_PRINTF_BUFFER_SIZE];
+    va_list args;
+    int len;
 
+    // Start va_list
+    va_start(args, format);
+    
+    // Format the string into buffer
+    len = vsnprintf(buffer, sizeof(buffer), format, args);
+    
+    // End va_list
+    va_end(args);
+    
+    // Check for formatting error
+    if (len < 0){
+        // vsnprintf failed - send error message
+        uart_console_write("Error: Formatting failed\r\n", 26);
+        return len;
+    }
+    // Check for truncation
+    if (len >= sizeof(buffer)) {
+        // Output was truncated - send what we have
+        buffer[sizeof(buffer) - 1] = '\0';
+        uart_console_write(buffer, sizeof(buffer) - 1);
+        uart_console_write("...\r\n", 5);
+        return len;
+    }
+    // Normal output - write formatted string to UART
+    uart_console_write(buffer, len);
+    return len;
+}

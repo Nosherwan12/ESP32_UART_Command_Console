@@ -1,11 +1,15 @@
-#include <stdio.h>
 #include <string.h>
+
+#include "esp_err.h"
+
 #include "command_dispatcher.h"
 #include "command_handlers.h"
+#include "uart_console.h"
 
 
 // Handler function pointer type
 typedef esp_err_t (*command_handler_t)(int argc, char *argv[]);
+
 
 // Command structure with description
 typedef struct {
@@ -14,31 +18,41 @@ typedef struct {
     const char *description;
 } command_t;
 
-// Command table with name, handler, description
+
+// Command table
 static const command_t command_table[] = {
-    {"help", help_handler, "Show available commands"},
-    {"led",  led_handler, "Control LED"},
-    {"info", info_handler, "Show system information"},
+    {"help",   help_handler,   "Show available commands"},
+    {"led",    led_handler,    "Control LED"},
+    {"info",   info_handler,   "Show system information"},
     {"reboot", reboot_handler, "Restart the ESP32"}
 };
 
+
 // Number of commands in table
-static const size_t command_count = sizeof(command_table) / sizeof(command_table[0]);
+static const size_t command_count =
+    sizeof(command_table) / sizeof(command_table[0]);
+
 
 // Print help function
 esp_err_t command_dispatcher_print_help(void)
 {
-    printf("\r\n=== Available Commands ===\r\n");
-    printf("%-10s %s\r\n", "Command", "Description");
-    printf("------------------------------\r\n");
-    
+    uart_console_printf("\r\n=== Available Commands ===\r\n");
+    uart_console_printf("%-10s %s\r\n", "Command", "Description");
+    uart_console_printf("------------------------------\r\n");
+
     for (size_t i = 0; i < command_count; i++) {
-        printf("%-10s %s\r\n", command_table[i].name, command_table[i].description);
+        uart_console_printf(
+            "%-10s %s\r\n",
+            command_table[i].name,
+            command_table[i].description
+        );
     }
-    printf("==============================\r\n");
-    
+
+    uart_console_printf("==============================\r\n");
+
     return ESP_OK;
 }
+
 
 // Execute command function
 esp_err_t command_dispatcher_execute(int argc, char *argv[])
@@ -51,19 +65,32 @@ esp_err_t command_dispatcher_execute(int argc, char *argv[])
 
     // Search for command in table
     for (size_t i = 0; i < command_count; i++) {
+
         if (strcmp(command_name, command_table[i].name) == 0) {
+
             // Command found - execute handler
             if (command_table[i].handler != NULL) {
                 return command_table[i].handler(argc, argv);
-            } else {
-                printf("Command '%s' handler not implemented yet\r\n", command_name);
-                return ESP_ERR_NOT_SUPPORTED;
             }
+
+            uart_console_printf(
+                "Command '%s' handler not implemented yet\r\n",
+                command_name
+            );
+
+            return ESP_ERR_NOT_SUPPORTED;
         }
     }
 
     // Command not found
-    printf("Unknown command: %s\r\n", command_name);
-    printf("Type 'help' for available commands\r\n");
+    uart_console_printf(
+        "Unknown command: %s\r\n",
+        command_name
+    );
+
+    uart_console_printf(
+        "Type 'help' for available commands\r\n"
+    );
+
     return ESP_ERR_NOT_FOUND;
 }
