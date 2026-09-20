@@ -57,7 +57,7 @@ The project implements a reusable command-line interface over UART, including li
 
 The console follows a layered command-processing flow:
 
-```text
+text
 UART Input
     │
     ▼
@@ -83,13 +83,12 @@ Command Dispatcher
          ├── LED Driver
          ├── ESP System APIs
          └── Restart
-```
+
 
 The application is intentionally separated into independent components so that the UART interface, parser, dispatcher, command handlers, and LED control can be developed and maintained independently.
 
 ## Project Structure
 
-```text
 UART Command Console/
 ├── CMakeLists.txt
 ├── README.md
@@ -129,7 +128,7 @@ UART Command Console/
         ├── led.c
         └── include/
             └── led.h
-```
+
 
 ## Hardware
 
@@ -159,27 +158,27 @@ Activate the ESP-IDF 5.3.1 environment and navigate to the project directory.
 
 Then build with:
 
-```bash
+bash
 idf.py build
-```
+
 
 To flash the firmware:
 
-```bash
+bash
 idf.py flash
-```
+
 
 To open the serial monitor:
 
-```bash
+bash
 idf.py monitor
-```
+
 
 Or combine flashing and monitoring:
 
-```bash
+bash
 idf.py flash monitor
-```
+
 
 ## Design Concepts Demonstrated
 
