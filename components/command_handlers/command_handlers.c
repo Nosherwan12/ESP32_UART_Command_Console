@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 
 #include "esp_err.h"

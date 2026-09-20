@@ -5,6 +5,7 @@
 #include <stdbool.h>   
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 #define UART_CONSOLE_NUM        UART_NUM_1
 #define UART_CONSOLE_TX_GPIO    17
@@ -103,7 +104,8 @@ int uart_console_printf(const char *format, ...)
     // Check for formatting error
     if (len < 0){
         // vsnprintf failed - send error message
-        uart_console_write("Error: Formatting failed\r\n", 26);
+        const char *error_msg = "Error: Formatting failed\r\n";
+        uart_console_write(error_msg, strlen(error_msg));
         return len;
     }
     // Check for truncation
