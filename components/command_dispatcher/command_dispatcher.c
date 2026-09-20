@@ -42,7 +42,6 @@ esp_err_t command_dispatcher_print_help(void)
 {
     uart_console_printf("\r\n=== Available Commands ===\r\n");
     uart_console_printf("%-10s %s\r\n", "Command", "Description");
-    uart_console_printf("------------------------------\r\n");
 
     for (size_t i = 0; i < command_count; i++) {
         uart_console_printf(

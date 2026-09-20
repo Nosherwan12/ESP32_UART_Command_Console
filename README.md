@@ -1,53 +1,212 @@
-| Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C5 | ESP32-C6 | ESP32-C61 | ESP32-H2 | ESP32-P4 | ESP32-S2 | ESP32-S3 | Linux |
-| ----------------- | ----- | -------- | -------- | -------- | -------- | --------- | -------- | -------- | -------- | -------- | ----- |
+# ESP32 UART Command Console
 
-# Hello World Example
+A modular UART-based command console for the ESP32, developed with **ESP-IDF and FreeRTOS**.
 
-Starts a FreeRTOS task to print "Hello World".
+The project implements a reusable command-line interface over UART, including line buffering, command parsing, command dispatch, argument validation, hardware control, system information, and controlled system restart.
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+## Features
 
-## How to use example
+* UART console at **115200 baud**
+* Character-by-character command input
+* Line buffering with CR/LF handling
+* Command parsing with whitespace-separated arguments
+* Argument-count validation
+* Command lookup using a command table
+* Modular command handlers
+* Command buffer overflow detection
+* LED control and status reporting
+* ESP32 system information reporting
+* Software-triggered system reboot
+* Formatted UART output using a `printf`-style interface
+* Modular ESP-IDF component architecture
 
-Follow detailed instructions provided specifically for this example.
+## Supported Commands
 
-Select the instructions depending on Espressif chip installed on your development board:
+| Command      | Description                                              |
+| ------------ | -------------------------------------------------------- |
+| `help`       | Show available commands                                  |
+| `led on`     | Turn the LED on                                          |
+| `led off`    | Turn the LED off                                         |
+| `led status` | Report the current LED state                             |
+| `info`       | Display chip, heap, flash, ESP-IDF and build information |
+| `reboot`     | Restart the ESP32                                        |
 
-- [ESP32 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html)
-- [ESP32-S2 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/get-started/index.html)
+### Example
 
+22:21:46.906 -> === Available Commands ===
+22:21:46.906 -> Command    Description
+22:21:46.906 -> help       Show available commands
+22:21:46.906 -> led        Control LED
+22:21:46.906 -> info       Show system information
+22:21:46.906 -> reboot     Restart the ESP32
+22:21:46.906 -> ==============================
+22:21:52.239 -> LED turned ON
+22:21:56.189 -> LED turned OFF
+22:21:59.003 -> === System Info ===
+22:21:59.003 -> Chip:      ESP32-S3 (2 cores)
+22:21:59.003 -> Free Heap: 372 KB
+22:21:59.003 -> Flash:     16 MB
+22:21:59.003 -> IDF:       v5.3.1-dirty
+22:21:59.003 -> Build:     Sep 20 2026 22:18:06
+22:21:59.003 -> ====================
+22:22:19.720 -> Unknown command: Hello
+22:22:19.720 -> Type 'help' for available commands
+22:22:26.235 -> SYSTEM REBOOTING..
 
-## Example folder contents
+## Command Processing Architecture
 
-The project **hello_world** contains one source file in C language [hello_world_main.c](main/hello_world_main.c). The file is located in folder [main](main).
+The console follows a layered command-processing flow:
 
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt` files that provide set of directives and instructions describing the project's source files and targets (executable, library, or both).
-
-Below is short explanation of remaining files in the project folder.
-
+```text
+UART Input
+    │
+    ▼
+UART Console
+    │
+    ▼
+Line Buffering
+    │
+    ▼
+Command Parser
+    │
+    ▼
+Command Dispatcher
+    │
+    ├── help
+    ├── led
+    ├── info
+    └── reboot
+         │
+         ▼
+   Command Handlers
+         │
+         ├── LED Driver
+         ├── ESP System APIs
+         └── Restart
 ```
+
+The application is intentionally separated into independent components so that the UART interface, parser, dispatcher, command handlers, and LED control can be developed and maintained independently.
+
+## Project Structure
+
+```text
+UART Command Console/
 ├── CMakeLists.txt
-├── pytest_hello_world.py      Python script used for automated testing
-├── main
+├── README.md
+├── sdkconfig
+│
+├── main/
 │   ├── CMakeLists.txt
-│   └── hello_world_main.c
-└── README.md                  This is the file you are currently reading
+│   └── main.c
+│
+└── components/
+    ├── uart_console/
+    │   ├── CMakeLists.txt
+    │   ├── uart_console.c
+    │   └── include/
+    │       └── uart_console.h
+    │
+    ├── command_parser/
+    │   ├── CMakeLists.txt
+    │   ├── command_parser.c
+    │   └── include/
+    │       └── command_parser.h
+    │
+    ├── command_dispatcher/
+    │   ├── CMakeLists.txt
+    │   ├── command_dispatcher.c
+    │   └── include/
+    │       └── command_dispatcher.h
+    │
+    ├── command_handlers/
+    │   ├── CMakeLists.txt
+    │   ├── command_handlers.c
+    │   └── include/
+    │       └── command_handlers.h
+    │
+    └── led/
+        ├── CMakeLists.txt
+        ├── led.c
+        └── include/
+            └── led.h
 ```
 
-For more information on structure and contents of ESP-IDF projects, please refer to Section [Build System](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) of the ESP-IDF Programming Guide.
+## Hardware
 
-## Troubleshooting
+The console uses the ESP32-S3 development board's UART interface.
 
-* Program upload failure
+| Function  |    GPIO |
+| --------- | ------: |
+| UART TX   | GPIO 17 |
+| UART RX   | GPIO 18 |
+| LED       |  GPIO 6 |
+| Baud rate |  115200 |
 
-    * Hardware connection is not correct: run `idf.py -p PORT monitor`, and reboot your board to see if there are any output logs.
-    * The baud rate for downloading is too high: lower your baud rate in the `menuconfig` menu, and try again.
+A USB-to-UART interface can be used to communicate with the console from a PC.
 
-## Technical support and feedback
+## Software
 
-Please use the following feedback channels:
+* **MCU:** ESP32-S3
+* **Framework:** ESP-IDF
+* **Language:** C
+* **RTOS:** FreeRTOS
+* **Build system:** CMake
+* **Development environment:** VS Code / ESP-IDF
 
-* For technical queries, go to the [esp32.com](https://esp32.com/) forum
-* For a feature request or bug report, create a [GitHub issue](https://github.com/espressif/esp-idf/issues)
+## Build
 
-We will get back to you as soon as possible.
+Activate the ESP-IDF 5.3.1 environment and navigate to the project directory.
+
+Then build with:
+
+```bash
+idf.py build
+```
+
+To flash the firmware:
+
+```bash
+idf.py flash
+```
+
+To open the serial monitor:
+
+```bash
+idf.py monitor
+```
+
+Or combine flashing and monitoring:
+
+```bash
+idf.py flash monitor
+```
+
+## Design Concepts Demonstrated
+
+This project focuses on practical embedded firmware concepts:
+
+* UART peripheral configuration
+* Hardware abstraction
+* Character-stream processing
+* Fixed-size buffer management
+* Input validation
+* Tokenization and argument parsing
+* Function pointers
+* Command tables
+* Modular firmware architecture
+* ESP-IDF component dependencies
+* Error handling with `esp_err_t`
+* Hardware control through a dedicated driver
+* Defensive handling of oversized input
+
+## Future Improvements
+
+Potential extensions include:
+
+* Command auto-completion
+* Backspace/editing support
+* Command history
+* Additional peripheral-control commands
+* Non-blocking UART input
+* More structured command/response handling
+* Unit testing for the parser and dispatcher
