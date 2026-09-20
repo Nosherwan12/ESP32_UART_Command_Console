@@ -8,7 +8,6 @@ extern "C" {
 #endif
 
 // Function declarations
-esp_err_t help_handler(int argc, char *argv[]);
 esp_err_t led_handler(int argc, char *argv[]);
 esp_err_t info_handler(int argc, char *argv[]);
 esp_err_t reboot_handler(int argc, char *argv[]);

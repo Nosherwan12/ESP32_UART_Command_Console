@@ -1,11 +1,4 @@
 idf_component_register(
-    SRCS 
-        "main.c"
-        "uart_console.c"
-        "command_parser.c"
-        "command_dispatcher.c"
-        "command_handlers.c"
-        "led.c"
-    INCLUDE_DIRS 
-        "."
+    SRCS "main.c"
+    REQUIRES uart_console command_parser command_dispatcher led
 )

@@ -18,13 +18,17 @@ typedef struct {
     const char *description;
 } command_t;
 
+static esp_err_t help_command_handler(int argc, char *argv[])
+{
+    return command_dispatcher_print_help();
+}
 
 // Command table
 static const command_t command_table[] = {
-    {"help",   help_handler,   "Show available commands"},
-    {"led",    led_handler,    "Control LED"},
-    {"info",   info_handler,   "Show system information"},
-    {"reboot", reboot_handler, "Restart the ESP32"}
+    {"help",   help_command_handler,   "Show available commands"},
+    {"led",    led_handler,            "Control LED"},
+    {"info",   info_handler,           "Show system information"},
+    {"reboot", reboot_handler,         "Restart the ESP32"}
 };
 
 

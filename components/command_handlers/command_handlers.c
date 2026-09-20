@@ -9,15 +9,8 @@
 #include "freertos/task.h"
 
 #include "command_handlers.h"
-#include "command_dispatcher.h"
 #include "led.h"
 #include "uart_console.h"
-
-
-esp_err_t help_handler(int argc, char *argv[])
-{
-    return command_dispatcher_print_help();
-}
 
 
 esp_err_t led_handler(int argc, char *argv[])
