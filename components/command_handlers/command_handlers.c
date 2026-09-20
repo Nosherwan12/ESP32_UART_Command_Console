@@ -43,12 +43,16 @@ esp_err_t led_handler(int argc, char *argv[])
     }
 
     else if (strcmp(action, "status") == 0) {
-        uart_console_printf("LED is %s\r\n", led_get_state() ? "ON" : "OFF");
+        uart_console_printf("LED is %s\r\n",
+                            led_get_state() ? "ON" : "OFF");
         return ESP_OK;
     }
 
     else {
-        uart_console_printf("Invalid action: %s (use on/off/status)\r\n", action);
+        uart_console_printf(
+            "Invalid action: %s (use on/off/status)\r\n",
+            action
+        );
         return ESP_ERR_INVALID_ARG;
     }
 }
@@ -61,7 +65,7 @@ esp_err_t info_handler(int argc, char *argv[])
         return ESP_ERR_INVALID_ARG;
     }
 
-    uart_console_printf("\r\n=== System Info ===\r\n");
+    uart_console_printf("=== System Info ===\r\n");
 
     // Chip information
     esp_chip_info_t chip;
@@ -91,34 +95,52 @@ esp_err_t info_handler(int argc, char *argv[])
             break;
     }
 
-    uart_console_printf("Chip:      %s (%d cores)\r\n", chip_name, chip.cores);
+    uart_console_printf(
+        "Chip:      %s (%d cores)\r\n",
+        chip_name,
+        chip.cores
+    );
 
     // Memory information
-    uart_console_printf("Free Heap: %lu KB\r\n",
-           (unsigned long)(esp_get_free_heap_size() / 1024));
+    uart_console_printf(
+        "Free Heap: %lu KB\r\n",
+        (unsigned long)(esp_get_free_heap_size() / 1024)
+    );
 
     // Flash information
     uint32_t flash_size;
     esp_err_t ret = esp_flash_get_size(NULL, &flash_size);
 
     if (ret == ESP_OK) {
-        uart_console_printf("Flash:     %lu MB\r\n",
-               (unsigned long)(flash_size / (1024 * 1024)));
+        uart_console_printf(
+            "Flash:     %lu MB\r\n",
+            (unsigned long)(flash_size / (1024 * 1024))
+        );
     } else {
-        uart_console_printf("Flash:     unavailable (error: %s)\r\n",
-               esp_err_to_name(ret));
+        uart_console_printf(
+            "Flash:     unavailable (error: %s)\r\n",
+            esp_err_to_name(ret)
+        );
     }
 
     // ESP-IDF version
-    uart_console_printf("IDF:       %s\r\n", esp_get_idf_version());
+    uart_console_printf(
+        "IDF:       %s\r\n",
+        esp_get_idf_version()
+    );
 
     // Firmware build information
-    uart_console_printf("Build:     %s %s\r\n", __DATE__, __TIME__);
+    uart_console_printf(
+        "Build:     %s %s\r\n",
+        __DATE__,
+        __TIME__
+    );
 
-    uart_console_printf("========================\r\n");
+    uart_console_printf("====================\r\n");
 
     return ESP_OK;
 }
+
 
 esp_err_t reboot_handler(int argc, char *argv[])
 {
@@ -128,18 +150,16 @@ esp_err_t reboot_handler(int argc, char *argv[])
         uart_console_printf("This command takes no arguments\r\n");
         return ESP_ERR_INVALID_ARG;
     }
-    
+
     // Print restart message
-    uart_console_printf("\r\n");
-    uart_console_printf("        SYSTEM REBOOTING...              \r\n");
-    uart_console_printf("\r\n");
-    
+    uart_console_printf("SYSTEM REBOOTING...\r\n");
+
     // Small delay to allow UART to flush
     vTaskDelay(pdMS_TO_TICKS(100));
-    
+
     // Restart the ESP32
     esp_restart();
-    
+
     // Should never reach here
     return ESP_OK;
 }
