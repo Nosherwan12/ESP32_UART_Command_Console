@@ -33,31 +33,47 @@ The project implements a reusable command-line interface over UART, including li
 
 ### Example
 
-22:21:46.906 -> === Available Commands ===
-22:21:46.906 -> Command    Description
-22:21:46.906 -> help       Show available commands
-22:21:46.906 -> led        Control LED
-22:21:46.906 -> info       Show system information
-22:21:46.906 -> reboot     Restart the ESP32
-22:21:46.906 -> ==============================
-22:21:52.239 -> LED turned ON
-22:21:56.189 -> LED turned OFF
-22:21:59.003 -> === System Info ===
-22:21:59.003 -> Chip:      ESP32-S3 (2 cores)
-22:21:59.003 -> Free Heap: 372 KB
-22:21:59.003 -> Flash:     16 MB
-22:21:59.003 -> IDF:       v5.3.1-dirty
-22:21:59.003 -> Build:     Sep 20 2026 22:18:06
-22:21:59.003 -> ====================
-22:22:19.720 -> Unknown command: Hello
-22:22:19.720 -> Type 'help' for available commands
-22:22:26.235 -> SYSTEM REBOOTING..
+```text
+> help
+=== Available Commands ===
+Command    Description
+help       Show available commands
+led        Control LED
+info       Show system information
+reboot     Restart the ESP32
+==============================
+
+> led on
+LED turned ON
+
+> led status
+LED is ON
+
+> led off
+LED turned OFF
+
+> info
+=== System Info ===
+Chip:      ESP32-S3 (2 cores)
+Free Heap: 372 KB
+Flash:     16 MB
+IDF:       v5.3.1-dirty
+Build:     Sep 20 2026 22:18:06
+====================
+
+> hello
+Unknown command: hello
+Type 'help' for available commands
+
+> reboot
+SYSTEM REBOOTING...
+```
 
 ## Command Processing Architecture
 
 The console follows a layered command-processing flow:
 
-text
+```text
 UART Input
     │
     ▼
@@ -83,12 +99,13 @@ Command Dispatcher
          ├── LED Driver
          ├── ESP System APIs
          └── Restart
-
+```
 
 The application is intentionally separated into independent components so that the UART interface, parser, dispatcher, command handlers, and LED control can be developed and maintained independently.
 
 ## Project Structure
 
+```text
 UART Command Console/
 ├── CMakeLists.txt
 ├── README.md
@@ -128,7 +145,7 @@ UART Command Console/
         ├── led.c
         └── include/
             └── led.h
-
+```
 
 ## Hardware
 
@@ -154,31 +171,31 @@ A USB-to-UART interface can be used to communicate with the console from a PC.
 
 ## Build
 
-Activate the ESP-IDF 5.3.1 environment and navigate to the project directory.
+Activate the ESP-IDF environment and navigate to the project directory.
 
-Then build with:
+Build the project:
 
-bash
+```bash
 idf.py build
+```
 
+Flash the firmware:
 
-To flash the firmware:
-
-bash
+```bash
 idf.py flash
+```
 
+Open the serial monitor:
 
-To open the serial monitor:
-
-bash
+```bash
 idf.py monitor
-
+```
 
 Or combine flashing and monitoring:
 
-bash
+```bash
 idf.py flash monitor
-
+```
 
 ## Design Concepts Demonstrated
 
